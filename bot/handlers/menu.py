@@ -9,6 +9,8 @@ from telegram import BotCommand
 from telegram.ext import Application
 
 from ..keyboard.main_menu import *
+from bot.db.db_session import SessionLocal
+from bot.db import user
 
 
 async def set_bot_commands(application: Application) -> None:
@@ -29,16 +31,20 @@ async def show_settings_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 async def about_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    message = (
-        f"<b>{user.full_name}</b>\n"
-        f"👤 <b>我的</b>\n\n"
-        f"<b>昵称：</b>{user.username or '无'}\n"
-        f"<b>ID：</b><code>{user.id}</code>\n\n"
-        f"💵 已提现：0$\n"
-        f"💰 余额：0$\n"
-        f"⏳ 待入账金额：0$"
-    )
+    user_obj = update.effective_user
+    try:
+        with user.SessionLocal() as db:
+            userdb = user.get_user(db, user_obj.id)
+            message = (
+                f"<b>{user_obj.full_name}</b>\n"
+                f"👤 <b>我的</b>\n\n"
+                f"<b>昵称：</b>{user_obj.username or '无'}\n"
+                f"<b>ID：</b><code>{user_obj.id}</code>\n\n"
+                f"💵 AITOKEN：{userdb.ai_token}\n"
+            )
+    except Exception as e:
+        message = f"<b>请点击 /star 命令、初始化账户</b>"
+
     await update.message.reply_html(
         message,
         reply_markup=get_profile_keyboard()
