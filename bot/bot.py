@@ -4,6 +4,7 @@
 # @Desc : 
 # @Date  :  2025/05/10
 import asyncio
+import signal
 
 import nest_asyncio
 from bot.config import BOT_TOKEN, adminLog, proxy
@@ -37,7 +38,7 @@ async def main():
         app.add_handler(command)
     for message_handler in get_message_handles():
         app.add_handler(message_handler)
-    await app.run_polling()
+    app.run_polling(poll_interval=3, close_loop=False)
 
 
 if __name__ == '__main__':
