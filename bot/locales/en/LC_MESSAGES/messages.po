@@ -1,0 +1,48 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: my_telegram_bot 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-13 12:00+0000\n"
+"PO-Revision-Date: 2025-05-13 12:00+0000\n"
+"Last-Translator: Martin <you@example.com>\n"
+"Language-Team: Chinese Simplified\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: commands.py:2
+msgid "开始"
+msgstr "Start"
+
+#: commands.py:3
+msgid "帮助信息"
+msgstr "Help Information"
+
+#: commands.py:4
+msgid "语言设置"
+msgstr "Language Settings"
+
+#: commands.py:5
+msgid "隔夜新闻"
+msgstr "Overnight News"
+
+#: user.py:get_main_button
+msgid "热门"
+msgstr "Hot"
+
+#: user.py:get_main_button
+msgid "新闻"
+msgstr "news"
+
+#: user.py:get_main_button
+msgid "我的"
+msgstr "Me"
+msgid "菜单"
+msgstr "Menu"
+#: some_handler
+msgid "请选择一个操作："
+msgstr "Please choose an action:"
+
+msgid "请选择你的语言"
+msgstr "Please choose an Language"

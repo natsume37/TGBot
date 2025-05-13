@@ -32,8 +32,8 @@ async def main():
     app.add_error_handler(error)
     adminLog.info('Polling....')
     adminLog.debug("Enter CTR C Stop.....")
-
-    await set_bot_commands(app)  # 设置命令菜单（自定义）
+    # 自定义功能菜单设置
+    await set_bot_commands(app)
     for command in get_commands():
         app.add_handler(command)
     for message_handler in get_message_handles():

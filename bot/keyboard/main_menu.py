@@ -7,12 +7,25 @@
 from telegram import ReplyKeyboardMarkup, KeyboardButton, Update, ReplyKeyboardRemove, InlineKeyboardButton, \
     InlineKeyboardMarkup
 from telegram.ext import ContextTypes
+from bot.utils.tools import get_translator
 
 
-def get_main_button():
+def get_main_button(lang_code: str) -> ReplyKeyboardMarkup:
+    """
+    根据用户语言动态生成主菜单按钮。
+    :param lang_code: 'en' 或 'zh'
+    """
+    # 1. 拉取对应语言的翻译函数
+    _ = get_translator(lang_code)
+
     keyboard = [
-        [KeyboardButton("🔥热门"), KeyboardButton("📰新闻"), KeyboardButton("👤我的")]
+        [
+            KeyboardButton(f"🔥{_('热门')}"),
+            KeyboardButton(f"📰{_('新闻')}"),
+            KeyboardButton(f"👤{_('我的')}")
+        ]
     ]
+
     return ReplyKeyboardMarkup(
         keyboard=keyboard,
         resize_keyboard=True,

@@ -1,22 +1,77 @@
-# encoding: utf-8
-# @File  : models.py
-# @Author: Martin
-# @Desc : 
-# @Date  :  2025/05/11
-from datetime import datetime
+from enum import Enum
+from sqlalchemy import (
+    Column,
+    Integer,
+    BigInteger,
+    String,
+    Boolean,
+    DateTime,
+    Enum as SQLEnum,
+    func
+)
+from sqlalchemy.ext.declarative import declarative_base
 
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, BigInteger
+# 声明基础类
+Base = declarative_base()
 
-from .db_session import Base
+
+class LanguageEnum(str, Enum):
+    """
+    用户语言枚举
+    使用标准的小写 value，便于与前端及数据库交互
+    """
+    EN = 'en'
+    ZH = 'zh'
+
+    def __str__(self):
+        return self.value
 
 
 class User(Base):
+    """
+    用户表模型
+    使用 SQLAlchemy 标准 Declarative 模式，字段使用常见约定
+    """
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True)
-    telegram_id = Column(BigInteger, unique=True, index=True, nullable=False)
-    telegram_name = Column(String(20))
-    is_admin = Column(Boolean, default=False, )
-    ai_token = Column(Integer, default=10, nullable=False)
-    is_block = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    id = Column(Integer, primary_key=True, comment='主键')
+    telegram_id = Column(
+        BigInteger,
+        unique=True,
+        nullable=False,
+        index=True,
+        comment='Telegram 用户唯一 ID'
+    )
+    telegram_name = Column(String(50), comment='Telegram 用户名')
+    is_admin = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+        comment='是否为管理员'
+    )
+    language = Column(
+        SQLEnum(LanguageEnum, name='language_enum', native_enum=False),
+        nullable=False,
+        default=LanguageEnum.EN,
+        comment='用户语言'
+    )
+    ai_token = Column(
+        Integer,
+        default=10,
+        nullable=False,
+        comment='AI 调用剩余次数'
+    )
+    is_block = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+        comment='是否被屏蔽'
+    )
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        comment='创建时间'
+    )
+
+# 如果需要额外的索引或约束，可以在表级元数据中定义。

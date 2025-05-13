@@ -7,3 +7,5 @@
 
 def handle_response(test: str) -> str:
     return test.lower()
+
+

@@ -11,14 +11,23 @@ from telegram.ext import Application
 from ..keyboard.main_menu import *
 from bot.db.db_session import SessionLocal
 from bot.db import user
+from bot.utils.tools import get_translator
+from bot.config import adminLog
 
 
 async def set_bot_commands(application: Application) -> None:
+    """
+    全局命令设置
+    :param application:
+    :return:
+    """
+    lang_code = 'zh'  # 默认中文
+    _ = get_translator(lang_code)
     commands = [
-        BotCommand("start", "Start the bot"),
-        BotCommand("help", "Help info"),
-        BotCommand('custom', '自定义功能'),
-        BotCommand('news', '新闻功能')
+        BotCommand("start", _("🔛开始")),
+        BotCommand("help", _("💁帮助信息")),
+        BotCommand("language", _("语言设置")),
+        BotCommand("news", _("📰隔夜新闻"))
     ]
     await application.bot.set_my_commands(commands=commands)
 
