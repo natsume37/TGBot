@@ -34,6 +34,10 @@ CTR + C: STOP
 
 ```CMD
 python main.py
+
+# 注意取消main.py文件的既可每次自动编译po文件
+compile_mo_files()
+
 ```
 
 # 效果图
