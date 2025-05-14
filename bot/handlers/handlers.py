@@ -1,7 +1,7 @@
 # encoding: utf-8
 # @File  : handlers.py
 # @Author: Martin
-# @Desc : 
+# @Desc :
 # @Date  :  2025/05/10
 from telegram import Update, BotCommand, BotCommandScopeChat
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
@@ -14,6 +14,7 @@ from bot.db import user
 from bot.db.user import *
 from bot.config import adminLog
 from ..utils.tools import get_translator
+from bot.handlers.menu import *
 
 
 # Command
@@ -58,7 +59,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def news_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     news_fetcher = NewsFetcher()
     news = await news_fetcher.get_news()
-    await update.message.reply_text(news or "获取新闻失败，请稍后再试")
+    # 判断调用来源
+    if update.message:
+        await update.message.reply_text(news)
+    elif update.callback_query:
+        await update.callback_query.message.reply_text(news)
 
 
 async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -88,6 +93,9 @@ async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         lang_code = 'en'
 
+    # 将用户的语言设置到上下文中、方便其他的handel直接使用不用频繁的调用数据库了
+
+    context.user_data["language"] = lang_code
     # 获取翻译函数
     _ = get_translator(lang_code)
 
@@ -101,17 +109,40 @@ async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+async def home_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # 1. 获取语言
+    lang_code = context.user_data.get("language", "en")
+    _ = get_translator(lang_code)
+
+    reply_markup = await get_home_keyboard(update, context)
+
+    # 添加按钮回调函数的复用
+    if update.message:
+        await update.message.reply_text(
+            _("查看帮助👉️ /help；"),
+            reply_markup=reply_markup
+        )
+    # 支持callback_query
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(
+            text=_("查看帮助👉️ /help；"),
+            reply_markup=reply_markup
+        )
+
+
 async def language_button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer("更改中...")
-
-    lang_code = query.data  # 'zh' 或 'en'
+    # 告诉 Telegram 回调已处理（避免“正在加载”状态）
+    await query.answer()
+    # 'zh' 或 'en'
+    lang_code = query.data
 
     telegram_id = query.from_user.id
     with user.SessionLocal() as db:
         userdb = user.get_user(db, telegram_id)
         if query == userdb.language.value:
-            await context.bot.send_message(
+            # 覆盖回复信息
+            await context.bot.edit_message_text(
                 chat_id=telegram_id,
                 text="已完成"
             )

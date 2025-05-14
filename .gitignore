@@ -1,0 +1,5 @@
+*.log
+/even
+.env
+*.xml
+.idea

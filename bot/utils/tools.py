@@ -17,6 +17,7 @@ def get_translator(lang_code: str):
         return gettext.gettext  # 返回默认翻译函数（即不做翻译）
 
 
+
 if __name__ == '__main__':
     def main():
         # 测试不同语言的翻译

@@ -58,3 +58,15 @@ async def about_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message,
         reply_markup=get_profile_keyboard()
     )
+
+
+async def get_home_keyboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [
+            InlineKeyboardButton("首页", callback_data="home_main"),
+            InlineKeyboardButton("新闻", callback_data="home_news"),
+            InlineKeyboardButton("我的", callback_data="home_profile")
+        ],
+        [InlineKeyboardButton("language", callback_data="home_language")],
+    ]
+    return InlineKeyboardMarkup(keyboard)

@@ -28,8 +28,8 @@ msgid "隔夜新闻"
 msgstr "Overnight News"
 
 #: user.py:get_main_button
-msgid "热门"
-msgstr "Hot"
+msgid "首页"
+msgstr "Home"
 
 #: user.py:get_main_button
 msgid "新闻"
@@ -38,6 +38,7 @@ msgstr "news"
 #: user.py:get_main_button
 msgid "我的"
 msgstr "Me"
+
 msgid "菜单"
 msgstr "Menu"
 #: some_handler
@@ -46,3 +47,6 @@ msgstr "Please choose an action:"
 
 msgid "请选择你的语言"
 msgstr "Please choose an Language"
+
+msgid "查看帮助👉️ /help"
+msgstr "See Help 👉️ Help"

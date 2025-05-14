@@ -20,7 +20,7 @@ def get_main_button(lang_code: str) -> ReplyKeyboardMarkup:
 
     keyboard = [
         [
-            KeyboardButton(f"🔥{_('热门')}"),
+            KeyboardButton(f"🔥{_('首页')}"),
             KeyboardButton(f"📰{_('新闻')}"),
             KeyboardButton(f"👤{_('我的')}")
         ]
