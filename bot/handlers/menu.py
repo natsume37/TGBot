@@ -4,15 +4,13 @@
 # @Desc : 
 # @Date  :  2025/05/10
 # bot/handlers/menu.py
-import telegram
 from telegram import BotCommand
 from telegram.ext import Application
 
 from ..keyboard.main_menu import *
-from bot.db.db_session import SessionLocal
+
 from bot.db import user
 from bot.utils.tools import get_translator
-from bot.config import adminLog
 
 
 async def set_bot_commands(application: Application) -> None:

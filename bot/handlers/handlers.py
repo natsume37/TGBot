@@ -3,17 +3,9 @@
 # @Author: Martin
 # @Desc :
 # @Date  :  2025/05/10
-from telegram import Update, BotCommand, BotCommandScopeChat
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from ..utils.message_handle import handle_response
-from ..services.news import NewsFetcher
-from bot.services.server_ai import ChatGPTBot
-from ..keyboard.main_menu import *
+
 from ..services import *
-from bot.db import user
-from bot.db.user import *
-from bot.config import adminLog
-from ..utils.tools import get_translator
+
 from bot.handlers.menu import *
 
 
