@@ -105,11 +105,17 @@ async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 设置键盘
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # 回复消息并显示按钮
-    await update.message.reply_text(
-        _("请选择你的语言" + '；'),
-        reply_markup=reply_markup
-    )
+    if update.message:
+        # 回复消息并显示按钮
+        await update.message.reply_text(
+            _("请选择你的语言" + '；'),
+            reply_markup=reply_markup
+        )
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(
+            _("请选择你的语言" + '；'),
+            reply_markup=reply_markup
+        )
 
 
 async def home_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -135,9 +141,6 @@ async def home_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             reply_markup=reply_markup
         )
-
-
-
 
 
 async def auto_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
