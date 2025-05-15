@@ -61,8 +61,7 @@ async def about_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif update.callback_query:
         await update.callback_query.edit_message_text(
             message,
-            reply_markup=get_profile_keyboard()
+            reply_markup=get_profile_keyboard(),
+            # 增加HTML文本支持
+            parse_mode="HTML"
         )
-
-
-
