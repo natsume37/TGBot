@@ -33,23 +33,24 @@ def get_main_button(lang_code: str) -> ReplyKeyboardMarkup:
     )
 
 
-def get_profile_keyboard():
+async def get_home_keyboard():
     keyboard = [
-        [InlineKeyboardButton("🎁 一键分享", callback_data="share"),
-         InlineKeyboardButton("➡️", callback_data="next_page")],
-        [InlineKeyboardButton("💵 收益提现", callback_data="withdraw"),
-         InlineKeyboardButton("💰 邀请赚钱", callback_data="invite")],
-        [InlineKeyboardButton("🔍 搜索设置", callback_data="search_settings"),
-         InlineKeyboardButton("📎 提交收录", callback_data="submit")]
+        [
+            InlineKeyboardButton("首页", callback_data="home_main"),
+            InlineKeyboardButton("新闻", callback_data="home_news"),
+            InlineKeyboardButton("我的", callback_data="home_profile")
+        ],
+        [InlineKeyboardButton("language", callback_data="home_language")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
 
-async def show_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "这是您的信息：xxxxxxx",
-        reply_markup=ReplyKeyboardRemove()  # 👈 移除键盘
-    )
+def get_profile_keyboard():
+    keyboard = [
+        [InlineKeyboardButton("返回", callback_data="home_back"),
+         InlineKeyboardButton("➡️", callback_data="next_page")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
 
 
 def get_settings_menu_keyboard():
@@ -58,3 +59,12 @@ def get_settings_menu_keyboard():
         [KeyboardButton("🔙 关闭页面")]  # 👈 返回按钮
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+
+# 新闻接口下按钮
+def get_news_keyboard():
+    keyboard = [
+        [InlineKeyboardButton("返回", callback_data="home_back"),
+         InlineKeyboardButton("➡️", callback_data="next_page")],
+    ]
+    return InlineKeyboardMarkup(keyboard)

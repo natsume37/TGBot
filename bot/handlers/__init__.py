@@ -32,6 +32,6 @@ def get_message_handles():
 def get_keyboard_callback():
     return [
         # 语言命令回调
-        CallbackQueryHandler(language_command, pattern="^(zh|en)$"),
+        CallbackQueryHandler(language_button_keyboard, pattern="^(zh|en)$"),
         CallbackQueryHandler(home_menu_callback, pattern="^home_"),
     ]

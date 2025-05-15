@@ -61,9 +61,12 @@ async def news_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     news = await news_fetcher.get_news()
     # 判断调用来源
     if update.message:
-        await update.message.reply_text(news)
+        await update.message.reply_text(
+            news,
+            reply_markup=get_news_keyboard()
+        )
     elif update.callback_query:
-        await update.callback_query.message.reply_text(news)
+        await update.callback_query.edit_message_text(news, reply_markup=get_news_keyboard())
 
 
 async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -114,75 +117,27 @@ async def home_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang_code = context.user_data.get("language", "en")
     _ = get_translator(lang_code)
 
-    reply_markup = await get_home_keyboard(update, context)
+    reply_markup = await get_home_keyboard()
 
     # 添加按钮回调函数的复用
     if update.message:
+        adminLog.info("message类型")
         await update.message.reply_text(
             _("查看帮助👉️ /help；"),
             reply_markup=reply_markup
         )
+
     # 支持callback_query
     elif update.callback_query:
+        adminLog.info("callback类型按钮")
         await update.callback_query.edit_message_text(
             text=_("查看帮助👉️ /help；"),
+
             reply_markup=reply_markup
         )
 
 
-async def language_button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    # 告诉 Telegram 回调已处理（避免“正在加载”状态）
-    await query.answer()
-    # 'zh' 或 'en'
-    lang_code = query.data
 
-    telegram_id = query.from_user.id
-    with user.SessionLocal() as db:
-        userdb = user.get_user(db, telegram_id)
-        if query == userdb.language.value:
-            # 覆盖回复信息
-            await context.bot.edit_message_text(
-                chat_id=telegram_id,
-                text="已完成"
-            )
-            return
-    adminLog.debug(f'语言设置被调用 lang_code: {lang_code}')
-
-    # 更新数据库
-    success = update_user_language(telegram_id, lang_code)
-    if not success:
-        await query.edit_message_text(text="语言切换失败，请稍后重试。")
-        return
-
-    # 翻译函数
-    _ = get_translator(lang_code)
-
-    # 更新菜单命令（左边菜单）
-    commands = [
-        BotCommand("start", f'▶️{_("开始")}'),
-        BotCommand("help", f'💁{_("帮助信息")}'),
-        BotCommand("language", f'🌏️{_("语言设置")}'),
-        BotCommand("news", f'📰{_("隔夜新闻")}'),
-    ]
-    # 私人命令翻译
-    scope = BotCommandScopeChat(chat_id=telegram_id)
-    await context.bot.set_my_commands(commands=commands, scope=scope, language_code=lang_code)
-    # 先清空按钮（解决客户端缓存问题）
-    await context.bot.send_message(
-        chat_id=telegram_id,
-        text=_("正在更新语言设置..."),
-        reply_markup=ReplyKeyboardRemove()
-    )
-    # 刷新底部按钮
-    reply_markup = get_main_button(lang_code)
-    await context.bot.send_message(
-        chat_id=telegram_id,
-        text=_("语言已更改为：{lang}").format(lang=_("中文") if lang_code == 'zh' else _("English")),
-        reply_markup=reply_markup,
-    )
-
-    adminLog.info(f"已为用户 {telegram_id} 应用语言：{lang_code}")
 
 
 async def auto_command(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -53,20 +53,16 @@ async def about_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
     except Exception as e:
         message = f"<b>请点击 /star 命令、初始化账户</b>"
+    if update.message:
+        await update.message.reply_html(
+            message,
+            reply_markup=get_profile_keyboard()
+        )
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(
+            message,
+            reply_markup=get_profile_keyboard()
+        )
 
-    await update.message.reply_html(
-        message,
-        reply_markup=get_profile_keyboard()
-    )
 
 
-async def get_home_keyboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [
-            InlineKeyboardButton("首页", callback_data="home_main"),
-            InlineKeyboardButton("新闻", callback_data="home_news"),
-            InlineKeyboardButton("我的", callback_data="home_profile")
-        ],
-        [InlineKeyboardButton("language", callback_data="home_language")],
-    ]
-    return InlineKeyboardMarkup(keyboard)
