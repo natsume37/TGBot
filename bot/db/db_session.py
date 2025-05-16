@@ -3,15 +3,24 @@
 # @Author: Martin
 # @Desc : 
 # @Date  :  2025/05/11
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from bot.bot_config import Config
 
-from sqlalchemy import Column, String, create_engine, Integer
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import declarative_base
-from bot.config import DB_URL
+config = Config()
+# 创建异步引擎
+engine = create_async_engine("mysql+aiomysql://" + config.DB_URL, echo=True)
 
-# 初始化数据库连接:
-engine = create_engine(DB_URL, echo=False)
-# 创建DBSession类型:
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+# 同步引擎，用于建表
+not_sync_engine = create_engine("mysql+pymysql://" + config.DB_URL, echo=True)
+# 创建异步Session工厂，后续操作都使用 AsyncSession
+AsyncSessionLocal = sessionmaker(
+    class_=AsyncSession,
+    bind=engine,
+    expire_on_commit=False,
+    autoflush=False,
+)
 
+# 声明基类，所有模型继承它
 Base = declarative_base()

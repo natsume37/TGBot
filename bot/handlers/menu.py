@@ -4,20 +4,28 @@
 # @Desc : 
 # @Date  :  2025/05/10
 # bot/handlers/menu.py
+from telegram import Update
+from telegram.ext import ContextTypes
 from telegram import BotCommand
 from telegram.ext import Application
 
+from ..config import setup_logging
 from ..keyboard.main_menu import *
 
 from bot.db import user
+from bot.db.db_session import AsyncSessionLocal
 from bot.utils.tools import get_translator
+
+# 加载日志配置
+setup_logging()
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 async def set_bot_commands(application: Application) -> None:
     """
     全局命令设置
-    :param application:
-    :return:
     """
     lang_code = 'zh'  # 默认中文
     _ = get_translator(lang_code)
@@ -40,8 +48,8 @@ async def show_settings_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def about_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_obj = update.effective_user
     try:
-        with user.SessionLocal() as db:
-            userdb = user.get_user(db, user_obj.id)
+        async with AsyncSessionLocal() as db:
+            userdb = await user.get_user(db, user_obj.id)
             message = (
                 f"<b>{user_obj.full_name}</b>\n"
                 f"👤 <b>我的</b>\n\n"
@@ -50,7 +58,8 @@ async def about_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"💵 AITOKEN：{userdb.ai_token}\n"
             )
     except Exception as e:
-        message = f"<b>请点击 /star 命令、初始化账户</b>"
+        message = f"<b>请点击 /start 命令、初始化账户</b>"
+
     if update.message:
         await update.message.reply_html(
             message,
@@ -60,6 +69,5 @@ async def about_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.callback_query.edit_message_text(
             message,
             reply_markup=get_profile_keyboard(),
-            # 增加HTML文本支持
             parse_mode="HTML"
         )
