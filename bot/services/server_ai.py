@@ -10,15 +10,17 @@ from collections import defaultdict
 from typing import List
 from openai import OpenAIError
 
-from bot.config import open_key, model_type, SYSTEM_PROMPT, open_basic_url
+from bot.bot_config import Config
+
+config = Config()
 
 
 class ChatGPTBot:
-    def __init__(self, api_key: str = open_key, model: str = model_type):
-        self.client = openai.AsyncOpenAI(api_key=api_key, base_url=open_basic_url)
+    def __init__(self, api_key: str = config.OPEN_KEY, model: str = config.MODEL_TYPE):
+        self.client = openai.AsyncOpenAI(api_key=api_key, base_url=config.OPEN_BASIC_URL)
         self.model = model
         self.sessions = defaultdict(list)  # user_id -> message list
-        self.default_system_prompt = SYSTEM_PROMPT
+        self.default_system_prompt = config.SYSTEM_PROMPT
 
     def reset_session(self, user_id: int):
         self.sessions[user_id] = []

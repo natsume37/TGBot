@@ -2,7 +2,14 @@
 import os
 import polib
 from pathlib import Path
-from bot.config import adminLog
+
+from bot.config import setup_logging
+
+# 加载日志配置
+setup_logging()
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def find_locales_dirs(root_dir: Path):

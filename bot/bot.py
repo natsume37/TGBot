@@ -7,15 +7,25 @@ import asyncio
 import signal
 
 import nest_asyncio
-from bot.config import BOT_TOKEN, adminLog, proxy
+from bot.bot_config import Config
+from bot.config import setup_logging
 from bot.handlers import *
 from bot.utils.error import error
 from bot.handlers.menu import *
-from bot.db.db_session import engine
+from bot.db.db_session import not_sync_engine
 from bot.db import models
 
 # 补丁
 nest_asyncio.apply()
+
+setup_logging()
+import logging
+
+logger = logging.getLogger(__name__)
+config = Config()
+proxy = config.PROXY
+
+BOT_TOKEN = config.BOT_TOKEN
 
 
 def locate_update() -> Application:
@@ -25,7 +35,7 @@ def locate_update() -> Application:
     """
     if proxy:
         app = Application.builder().token(BOT_TOKEN).proxy(proxy).build()
-        adminLog.info(f"代理已启动proxy: {proxy}")
+        logger.info(f"代理已启动proxy: {proxy}")
     else:
         app = Application.builder().token(BOT_TOKEN).build()
     # 命令加载
@@ -43,15 +53,15 @@ def locate_update() -> Application:
 
 
 async def main():
-    adminLog.info("BOT Star....")
+    logger.info("BOT Star....")
     # Commands
     app = locate_update()
     # 初始化表
-    models.Base.metadata.create_all(bind=engine)
+    models.Base.metadata.create_all(bind=not_sync_engine)
     # Error
     app.add_error_handler(error)
-    adminLog.info('Polling....')
-    adminLog.debug("Enter CTR C Stop.....")
+    logger.info('Polling....')
+    logger.debug("Enter CTR C Stop.....")
 
     # 自定义功能菜单设置
     await set_bot_commands(app)
