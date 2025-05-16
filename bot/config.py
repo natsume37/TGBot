@@ -1,33 +1,33 @@
-# Bot token and config
-# Your bot's token here
-from dotenv import load_dotenv
 import os
-
-load_dotenv()  # 加载 .env 文件中的变量到环境变量
-
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-DB_URL = os.getenv("DB_URL")
-proxy = os.getenv('proxy')
-open_key = os.getenv('open_key')
-model_type = os.getenv('model_type')
-
-SYSTEM_PROMPT = os.getenv('SYSTEM_PROMPT')
-open_basic_url = os.getenv('open_basic_url')
-
 import logging
 import logging.config
-import os.path
 
-# 路径配置
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # 项目根目录
+# 读取环境变量
+ENV = os.getenv("ENV", "production").lower()
+GLOBAL_LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+
+IS_DEV = ENV == "development"
+
+# 日志文件路径
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # 这里以 config.py 所在目录为基准，你可根据需要调整
 INFO_LOG_DIR = os.path.join(BASE_DIR, "log", 'info.log')
 ERROR_LOG_DIR = os.path.join(BASE_DIR, "log", 'error.log')
 DEBUG_LOG_DIR = os.path.join(BASE_DIR, "log", 'debug.log')
 
+
+def ensure_log_dirs_exist():
+    """
+    确保日志目录存在，不存在则创建
+    """
+    for file_path in [INFO_LOG_DIR, ERROR_LOG_DIR, DEBUG_LOG_DIR]:
+        dir_path = os.path.dirname(file_path)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path, exist_ok=True)
+
+
 LOGGING_DIC = {
-    'version': 1.0,
+    'version': 1,
     'disable_existing_loggers': False,
-    # 日志格式
     'formatters': {
         'standard': {
             'format': '%(asctime)s %(threadName)s:%(thread)d [%(name)s] %(levelname)s [%(pathname)s:%(lineno)d] %(message)s',
@@ -37,65 +37,68 @@ LOGGING_DIC = {
             'format': '%(asctime)s [%(name)s] %(levelname)s %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S',
         },
-        'test': {
-            'format': '%(asctime)s %(message)s',
+        'sqlalchemy': {
+            'format': '[SQLALCHEMY] %(asctime)s %(levelname)s %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
         },
     },
-    'filters': {},
-    # 日志处理器
     'handlers': {
         'console_debug_handler': {
-            'level': 'DEBUG',  # 日志处理的级别限制
-            'class': 'logging.StreamHandler',  # 输出到终端
-            'formatter': 'simple'  # 日志格式
+            'level': 'DEBUG' if IS_DEV else 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
         'file_info_handler': {
             'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件,日志轮转
-            'filename': f'{INFO_LOG_DIR}',
-            'maxBytes': 1024 * 1024 * 10,  # 日志大小 10M
-            'backupCount': 10,  # 日志文件保存数量限制
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': INFO_LOG_DIR,
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 10,
             'encoding': 'utf-8',
             'formatter': 'standard',
         },
         'file_debug_handler': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',  # 保存到文件
-            'filename': f'{DEBUG_LOG_DIR}',  # 日志存放的路径
-            'encoding': 'utf-8',  # 日志文件的编码
-            'formatter': 'test',
+            'class': 'logging.FileHandler',
+            'filename': DEBUG_LOG_DIR,
+            'encoding': 'utf-8',
+            'formatter': 'simple',
         },
         'file_error_handler': {
             'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件,日志轮转
-            'filename': f'{ERROR_LOG_DIR}',
-            'maxBytes': 1024 * 1024 * 10,  # 日志大小 10M
-            'backupCount': 10,  # 日志文件保存数量限制
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': ERROR_LOG_DIR,
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 10,
             'encoding': 'utf-8',
             'formatter': 'standard',
         },
+        'sqlalchemy_handler': {
+            'level': 'INFO' if IS_DEV else 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'sqlalchemy',
+        },
     },
-    # 日志记录器
     'loggers': {
-        'admin': {  # 导入时logging.getLogger时使用的app_name
-            'handlers': ['console_debug_handler'],  # 日志分配到哪个handlers中
-            'level': 'DEBUG',  # 日志记录的级别限制
-            'propagate': False,  # 默认为True，向上（更高级别的logger）传递，设置为False即可，否则会一份日志向上层层传递
-        },
-        'logger2': {
-            'handlers': ['console_debug_handler', 'file_info_handler'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # 万能日志记录器
         '': {
-            'handlers': ['console_debug_handler', 'file_info_handler', 'file_error_handler'],  # 及答应到终端、也保存到文件
-            'level': 'INFO',
+            'handlers': ['console_debug_handler', 'file_info_handler', 'file_error_handler'],
+            'level': GLOBAL_LOG_LEVEL,
             'propagate': False,
         },
-    }
+        'sqlalchemy.engine': {
+            'handlers': ['sqlalchemy_handler'],
+            'level': 'INFO' if IS_DEV else 'WARNING',
+            'propagate': False,
+        },
+    },
 }
 
-# 使用
-logging.config.dictConfig(LOGGING_DIC)
-adminLog = logging.getLogger("admin")
+
+def setup_logging():
+    ensure_log_dirs_exist()
+    logging.config.dictConfig(LOGGING_DIC)
+    # 运行时确保 sqlalchemy.engine 日志级别正确
+    sqlalchemy_level = logging.INFO if IS_DEV else logging.WARNING
+    logging.getLogger("sqlalchemy.engine").setLevel(sqlalchemy_level)
+    logger = logging.getLogger(__name__)
+
