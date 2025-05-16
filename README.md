@@ -2,7 +2,7 @@
 
 # 简介
 
-这是一个个人娱乐的TelegramBot机器人项目、mysql作为后端存储用户基本信息
+这是一个个人娱乐的TelegramBot机器人项目、aiomysql作为后端存储用户基本信息
 
 包括一下几个功能
 
