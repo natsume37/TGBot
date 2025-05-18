@@ -3,6 +3,8 @@
 # @Author: Martin
 # @Desc :
 # @Date  :  2025/05/10
+from telegram.constants import ChatType
+
 from ..config import setup_logging
 from ..services import *
 from bot.handlers.menu import *
@@ -20,6 +22,7 @@ setup_logging()
 import logging
 
 logger = logging.getLogger(__name__)
+user_info = logging.getLogger("userInfo")
 
 
 # Command
@@ -120,38 +123,54 @@ async def home_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = await get_home_keyboard()
 
     if update.message:
-        logger.info("message类型")
+        logger.debug("message类型")
         await update.message.reply_text(
             _("查看帮助👉️ /help；"),
             reply_markup=reply_markup
         )
     elif update.callback_query:
-        logger.info("callback类型按钮")
+        logger.debug("callback类型按钮")
         await update.callback_query.edit_message_text(
             text=_("查看帮助👉️ /help；"),
             reply_markup=reply_markup
         )
 
 
-async def auto_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(f"you enter is {context}")
-
-
 async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_input = update.message.text
-    await update.message.chat.send_action(action="typing")
+    """
+    AI 回复、私聊直接回复、其他的判断是否被艾特
+    :param update:
+    :param context:
+    :return:
+    """
+    chat = update.effective_chat
+    message = update.message
+    user_input = message.text
+
+    # 判断是否是私聊
+    if chat.type == ChatType.PRIVATE:
+        should_reply = True
+    else:
+        # 群组中：仅当使用 @机器人用户名 艾特时回复
+        bot_username = (await context.bot.get_me()).username
+        should_reply = f"@{bot_username}" in user_input
+
+    if not should_reply:
+        return
+
+    # 显示“正在输入”
+    await context.bot.send_chat_action(chat_id=chat.id, action="typing")
 
     try:
         reply = await chat_for_ai(update, context, user_input)
-        await update.message.reply_text(reply)
+        await message.reply_text(reply)
     except Exception as e:
-        await update.message.reply_text("请求出错了，请稍后再试。")
+        await message.reply_text("请求出错了，请稍后再试。")
         logger.error(f"GPT请求错误：{e}")
 
 
 async def chat_for_ai(update: Update, context: ContextTypes.DEFAULT_TYPE, user_input: str):
     telegram_id = update.effective_user.id
-
     try:
         async with AsyncSessionLocal() as db:
             user_obj = await user.get_user(db, telegram_id)
@@ -162,7 +181,7 @@ async def chat_for_ai(update: Update, context: ContextTypes.DEFAULT_TYPE, user_i
             if user_obj.ai_token >= 1:
                 bot = ChatGPTBot()
                 res = await bot.chat(telegram_id, user_input)
-
+                user_info.info(f"{telegram_id}: {user_input}")
                 user_obj.ai_token -= 1
                 await db.commit()
 
@@ -187,3 +206,8 @@ async def sign_in_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         code, msg = await add_sign_in(db, update.effective_user.id)
 
         await update.message.reply_text(text=msg)
+
+
+async def get_id_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+    await update.message.reply_text(f"🆔 本群/频道的 ID 是: `{chat.id}`", parse_mode="Markdown")
