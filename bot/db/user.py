@@ -5,10 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import User, LanguageEnum
 from .db_session import AsyncSessionLocal
-from bot.config import setup_logging
-
-# 加载日志配置
-setup_logging()
 import logging
 
 logger = logging.getLogger(__name__)

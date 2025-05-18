@@ -36,9 +36,9 @@ def get_main_button(lang_code: str) -> ReplyKeyboardMarkup:
 async def get_home_keyboard():
     keyboard = [
         [
-            InlineKeyboardButton("首页", callback_data="home_main"),
-            InlineKeyboardButton("新闻", callback_data="home_news"),
-            InlineKeyboardButton("我的", callback_data="home_profile")
+            InlineKeyboardButton("🔥首页", callback_data="home_main"),
+            InlineKeyboardButton("📰新闻", callback_data="home_news"),
+            InlineKeyboardButton("👤我的", callback_data="home_profile")
         ],
         [InlineKeyboardButton("language", callback_data="home_language")],
     ]

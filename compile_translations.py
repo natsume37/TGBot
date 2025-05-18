@@ -3,10 +3,6 @@ import os
 import polib
 from pathlib import Path
 
-from bot.config import setup_logging
-
-# 加载日志配置
-setup_logging()
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,12 +23,12 @@ def compile_mo_files():
     # 查找所有 locales 目录
     locales_dirs = find_locales_dirs(script_dir)
     if not locales_dirs:
-        adminLog.info(f"❌ 在 {script_dir} 及子目录中未找到任何 'locales' 文件夹。")
+        logger.info(f"❌ 在 {script_dir} 及子目录中未找到任何 'locales' 文件夹。")
         return
 
     # 逐个处理每个 locales 目录
     for locale_dir in locales_dirs:
-        adminLog.info(f"\n🔍 开始扫描：{locale_dir}")
+        logger.info(f"\n🔍 开始扫描：{locale_dir}")
         for root, dirs, files in os.walk(locale_dir):
             po_files = [f for f in files if f.endswith('.po')]
             if not po_files:
@@ -41,14 +37,14 @@ def compile_mo_files():
                 po_path = Path(root) / po_filename
                 mo_path = po_path.with_suffix('.mo')
                 try:
-                    adminLog.info(f"   ▶ 编译 {po_filename} …")
+                    logger.info(f"   ▶ 编译 {po_filename} …")
                     po = polib.pofile(str(po_path))
                     po.save_as_mofile(str(mo_path))
-                    adminLog.info(f"   ✅ 成功：{mo_path.name}")
+                    logger.info(f"   ✅ 成功：{mo_path.name}")
                 except Exception as e:
-                    adminLog.info(f"   ❌ 失败：{po_filename}，错误：{e}")
+                    logger.info(f"   ❌ 失败：{po_filename}，错误：{e}")
 
-    adminLog.info("\n🎉 所有翻译已编译完毕！")
+    logger.info("\n🎉 所有翻译已编译完毕！")
 
 
 if __name__ == '__main__':

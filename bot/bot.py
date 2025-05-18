@@ -4,6 +4,7 @@
 # @Desc : 
 # @Date  :  2025/05/10
 import asyncio
+import logging
 import signal
 
 import nest_asyncio
@@ -18,10 +19,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 # 补丁
 nest_asyncio.apply()
-
+# 日志初始化
 setup_logging()
-import logging
-
 logger = logging.getLogger(__name__)
 config = Config()
 proxy = config.PROXY
@@ -62,12 +61,14 @@ async def main():
     logger.info("BOT Star....")
     # Commands
     app = locate_update()
+
     # 初始化表
-    await async_create_tables(async_engine)
+    # await async_create_tables(async_engine)
+
     # Error
     app.add_error_handler(error)
     logger.info('Polling....')
-    logger.debug("Enter CTR C Stop.....")
+    logger.info("Enter CTR C Stop.....")
 
     # 自定义功能菜单设置
     await set_bot_commands(app)

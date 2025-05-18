@@ -9,15 +9,11 @@ from telegram.ext import ContextTypes
 from telegram import BotCommand
 from telegram.ext import Application
 
-from ..config import setup_logging
 from ..keyboard.main_menu import *
 
 from bot.db import user
 from bot.db.db_session import AsyncSessionLocal
 from bot.utils.tools import get_translator
-
-# 加载日志配置
-setup_logging()
 import logging
 
 logger = logging.getLogger(__name__)

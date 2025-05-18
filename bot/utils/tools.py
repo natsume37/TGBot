@@ -1,5 +1,10 @@
 import gettext
+import logging
 import os
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_translator(lang_code: str):
@@ -13,9 +18,8 @@ def get_translator(lang_code: str):
         localedir = os.path.join(base_dir, "locales")
         return gettext.translation('messages', localedir=localedir, languages=[lang_code], fallback=True).gettext
     except FileNotFoundError:
-        print(f"Translation files for {lang_code} not found!")
+        logger.info(f"Translation files for {lang_code} not found!")
         return gettext.gettext  # 返回默认翻译函数（即不做翻译）
-
 
 
 if __name__ == '__main__':

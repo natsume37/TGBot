@@ -5,7 +5,7 @@
 # @Date  :  2025/05/10
 from telegram.constants import ChatType
 
-from ..config import setup_logging
+
 from ..services import *
 from bot.handlers.menu import *
 
@@ -16,13 +16,9 @@ from telegram import Update, BotCommand, BotCommandScopeChat, ReplyKeyboardRemov
 from telegram.ext import ContextTypes
 
 from bot.db.sign_in import *
-
-# 加载日志配置
-setup_logging()
 import logging
 
 logger = logging.getLogger(__name__)
-user_info = logging.getLogger("userInfo")
 
 
 # Command
@@ -102,6 +98,7 @@ async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["language"] = lang_code
     _ = get_translator(lang_code)
+
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     if update.message:
@@ -181,7 +178,7 @@ async def chat_for_ai(update: Update, context: ContextTypes.DEFAULT_TYPE, user_i
             if user_obj.ai_token >= 1:
                 bot = ChatGPTBot()
                 res = await bot.chat(telegram_id, user_input)
-                user_info.info(f"{telegram_id}: {user_input}")
+                logger.info(f"{telegram_id}: {user_input}")
                 user_obj.ai_token -= 1
                 await db.commit()
 

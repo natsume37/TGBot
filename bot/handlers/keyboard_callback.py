@@ -11,8 +11,6 @@ from telegram import BotCommand, BotCommandScopeChat, ReplyKeyboardRemove
 from telegram.ext import ContextTypes
 from telegram import Update
 
-# 加载日志配置
-setup_logging()
 import logging
 
 logger = logging.getLogger(__name__)
@@ -37,6 +35,7 @@ async def home_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.effective_message.reply_text("未知的菜单选项")
 
 
+# 按钮 en/zn触发
 async def language_button_keyboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -58,6 +57,7 @@ async def language_button_keyboard(update: Update, context: ContextTypes.DEFAULT
             return
 
     _ = get_translator(lang_code)
+    logger.debug(f"用户语言为：{lang_code}")
     # 删除原消息（含按钮），防止重复点击
     try:
         await context.bot.delete_message(

@@ -1,36 +1,29 @@
+# logger_config.py
 import os
 import logging
 import logging.config
 
-# 读取环境变量
-ENV = os.getenv("ENV", "production").lower()
+# 环境变量配置
 GLOBAL_LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
-IS_DEV = ENV == "development"
-
-# 日志文件路径
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # 这里以 config.py 所在目录为基准，你可根据需要调整
-INFO_LOG_DIR = os.path.join(BASE_DIR, "log", 'info.log')
-ERROR_LOG_DIR = os.path.join(BASE_DIR, "log", 'error.log')
-DEBUG_LOG_DIR = os.path.join(BASE_DIR, "log", 'debug.log')
-USER_LOG_DIR = os.path.join(BASE_DIR, "log", 'user.log')
+# 日志目录和文件
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_DIR = os.path.join(BASE_DIR, "log")
+INFO_LOG_PATH = os.path.join(LOG_DIR, "info.log")
+ERROR_LOG_PATH = os.path.join(LOG_DIR, "error.log")
+DEBUG_LOG_PATH = os.path.join(LOG_DIR, "debug.log")
 
 
 def ensure_log_dirs_exist():
-    """
-    确保日志目录存在，不存在则创建
-    """
-    for file_path in [INFO_LOG_DIR, ERROR_LOG_DIR, DEBUG_LOG_DIR]:
-        dir_path = os.path.dirname(file_path)
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path, exist_ok=True)
+    os.makedirs(LOG_DIR, exist_ok=True)
 
 
-LOGGING_DIC = {
+LOGGING_CONFIG = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': False,  # 保留未在此处显式配置的 logger，但我们后面会手动调整它们的级别
+
     'formatters': {
-        'standard': {
+        'detailed': {
             'format': '%(asctime)s %(threadName)s:%(thread)d [%(name)s] %(levelname)s [%(pathname)s:%(lineno)d] %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S',
         },
@@ -38,81 +31,92 @@ LOGGING_DIC = {
             'format': '%(asctime)s [%(name)s] %(levelname)s %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S',
         },
-        'sqlalchemy': {
-            'format': '[SQLALCHEMY] %(asctime)s %(levelname)s %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
-        },
     },
+
     'handlers': {
-        'console_debug_handler': {
-            'level': 'DEBUG' if IS_DEV else 'INFO',
+        'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-        'file_info_handler': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': INFO_LOG_DIR,
-            'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 10,
-            'encoding': 'utf-8',
-            'formatter': 'standard',
-        },
-        'file_debug_handler': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': DEBUG_LOG_DIR,
-            'encoding': 'utf-8',
             'formatter': 'simple',
+            'stream': 'ext://sys.stdout',
         },
-        'file_error_handler': {
-            'level': 'WARNING',
+        'info_file': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': ERROR_LOG_DIR,
-            'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 10,
-            'encoding': 'utf-8',
-            'formatter': 'standard',
-        },
-        'user_info_handler': {
             'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': USER_LOG_DIR,
+            'formatter': 'detailed',
+            'filename': INFO_LOG_PATH,
             'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 10,
+            'backupCount': 5,
             'encoding': 'utf-8',
-            'formatter': 'standard',
         },
-        'sqlalchemy_handler': {
-            'level': 'INFO' if IS_DEV else 'WARNING',
-            'class': 'logging.StreamHandler',
-            'formatter': 'sqlalchemy',
+        'error_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'WARNING',
+            'formatter': 'detailed',
+            'filename': ERROR_LOG_PATH,
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 5,
+            'encoding': 'utf-8',
+        },
+        'debug_file': {
+            'class': 'logging.FileHandler',
+            'level': 'DEBUG',
+            'formatter': 'detailed',
+            'filename': DEBUG_LOG_PATH,
+            'encoding': 'utf-8',
         },
     },
+
     'loggers': {
-        '': {
-            'handlers': ['console_debug_handler', 'file_info_handler', 'file_error_handler'],
-            'level': GLOBAL_LOG_LEVEL,
+        # 你自己项目的日志器
+        'myproject': {
+            'handlers': ['console', 'info_file', 'error_file', 'debug_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # 第三方库：强制提升到 WARNING
+        'sqlalchemy': {
+            'handlers': ['console'],
+            'level': 'WARNING',
             'propagate': False,
         },
         'sqlalchemy.engine': {
-            'handlers': ['sqlalchemy_handler'],
-            'level': 'INFO' if IS_DEV else 'WARNING',
+            'handlers': ['console'],
+            'level': 'WARNING',
             'propagate': False,
         },
-        'userInfo': {
-            'handlers': ["user_info_handler"],
-            'level': 'DEBUG',
+        'httpcore': {
+            'handlers': ['console'],
+            'level': 'WARNING',
             'propagate': False,
         },
+        'httpx': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'telegram': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+
+    # 根日志器：所有未单独配置的 logger 都走这里
+    'root': {
+        'handlers': ['console', 'info_file', 'error_file'],
+        'level': GLOBAL_LOG_LEVEL,
+        'propagate': False,
     },
 }
 
 
 def setup_logging():
+    """项目启动时调用一次，建立日志系统。"""
     ensure_log_dirs_exist()
-    logging.config.dictConfig(LOGGING_DIC)
-    # 运行时确保 sqlalchemy.engine 日志级别正确
-    sqlalchemy_level = logging.INFO if IS_DEV else logging.WARNING
-    logging.getLogger("sqlalchemy.engine").setLevel(sqlalchemy_level)
-    logger = logging.getLogger(__name__)
+    logging.config.dictConfig(LOGGING_CONFIG)
+
+    # 为保险起见，手动再把已有 logger 的级别调高
+    for name in ('sqlalchemy', 'sqlalchemy.engine', 'httpcore', 'httpx', 'telegram'):
+        logging.getLogger(name).setLevel(logging.WARNING)
+    logging.getLogger('myproject').info("日志系统已初始化")

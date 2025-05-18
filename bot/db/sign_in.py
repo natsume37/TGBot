@@ -6,10 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import SignIn, User
 from .db_session import AsyncSessionLocal
-from bot.config import setup_logging
+
 import logging
 
-setup_logging()
 logger = logging.getLogger(__name__)
 
 

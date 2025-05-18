@@ -20,9 +20,9 @@ def get_commands():
 
 def get_message_handles():
     return [
-        MessageHandler(filters.TEXT & filters.Regex('我的'), about_user),
+        MessageHandler(filters.TEXT & filters.Regex('👤我的'), about_user),
         MessageHandler(filters.TEXT & filters.Regex("📰新闻"), news_command),
-        MessageHandler(filters.TEXT & filters.Regex(r"^首页"), home_command),
+        MessageHandler(filters.TEXT & filters.Regex(r"🔥首页"), home_command),
         MessageHandler(filters.TEXT & filters.Regex(r"^#(签到|sign)"), sign_in_message),
         MessageHandler(filters.TEXT & filters.Regex(r"^#(id|ID)"), get_id_message),
         # AI 回复功能
