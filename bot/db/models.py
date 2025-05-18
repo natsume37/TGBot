@@ -1,3 +1,4 @@
+from datetime import datetime, date
 from enum import Enum
 from sqlalchemy import (
     Column,
@@ -7,7 +8,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     Enum as SQLEnum,
-    func
+    func, Date
 )
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -74,4 +75,13 @@ class User(Base):
         comment='创建时间'
     )
 
-# 如果需要额外的索引或约束，可以在表级元数据中定义。
+
+class SignIn(Base):
+    __tablename__ = "sign_in"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, nullable=False)
+    sign_date = Column(Date, nullable=False, default=date.today)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    total_days = Column(Integer, default=1)
+    streak_days = Column(Integer, default=1)
+

@@ -12,8 +12,9 @@ from bot.config import setup_logging
 from bot.handlers import *
 from bot.utils.error import error
 from bot.handlers.menu import *
-from bot.db.db_session import not_sync_engine
+from bot.db.db_session import async_engine
 from bot.db import models
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 # 补丁
 nest_asyncio.apply()
@@ -26,6 +27,11 @@ config = Config()
 proxy = config.PROXY
 
 BOT_TOKEN = config.BOT_TOKEN
+
+
+async def async_create_tables(async_engine: AsyncEngine):
+    async with async_engine.begin() as conn:
+        await conn.run_sync(models.Base.metadata.create_all)
 
 
 def locate_update() -> Application:
@@ -57,7 +63,7 @@ async def main():
     # Commands
     app = locate_update()
     # 初始化表
-    models.Base.metadata.create_all(bind=not_sync_engine)
+    await async_create_tables(async_engine)
     # Error
     app.add_error_handler(error)
     logger.info('Polling....')
