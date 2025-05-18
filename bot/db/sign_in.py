@@ -32,7 +32,7 @@ async def add_sign_in(db: AsyncSession, user_id: int, sign_date: Optional[date] 
 
     # 先检查是否已经签到
     if await user_signed_in_on(db, user_id, sign_date):
-        logger.info(f"User {user_id} already signed in on {sign_date}")
+        logger.debug(f"User {user_id} already signed in on {sign_date}")
         return False, "你已经签过到了"
 
     try:
@@ -52,6 +52,7 @@ async def add_sign_in(db: AsyncSession, user_id: int, sign_date: Optional[date] 
         # 计算连续签到天数和累计签到天数
         last_date = user.last_sign_date
         if last_date == sign_date - timedelta(days=1):
+            # 用户连续签到（用户上次签到时间等于昨天签到时间）
             user.streak_days += 1
         else:
             user.streak_days = 1
@@ -64,7 +65,7 @@ async def add_sign_in(db: AsyncSession, user_id: int, sign_date: Optional[date] 
 
         await db.commit()
         await db.refresh(user)
-        logger.info(f"User {user_id} signed in on {sign_date}. Streak: {user.streak_days}, Total: {user.total_days}")
+        logger.debug(f"User {user_id} signed in on {sign_date}. Streak: {user.streak_days}, Total: {user.total_days}")
         return True, "签到成功"
     except SQLAlchemyError as e:
         await db.rollback()
