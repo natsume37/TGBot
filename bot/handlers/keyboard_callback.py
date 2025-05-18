@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 async def home_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    logger.info("回调信息被执行")
+    logger.debug("回调信息被执行")
     query = update.callback_query
     await query.answer()
     date = query.data
@@ -28,7 +28,6 @@ async def home_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     elif date == "home_news":
         await news_command(update, context)
     elif date == "home_profile":
-        logger.info("此处")
         await about_user(update, context)
     elif date == "home_language":
         await language_command(update, context)
@@ -48,40 +47,46 @@ async def language_button_keyboard(update: Update, context: ContextTypes.DEFAULT
     async with AsyncSessionLocal() as db:
         userdb = await user.get_user(db, telegram_id)
         if userdb and lang_code == userdb.language.value:
-            await context.bot.edit_message_text(
-                chat_id=telegram_id,
-                text="已完成"
-            )
+            await query.edit_message_text(text="✅ 已是当前语言设置。")
             return
 
         logger.debug(f'语言设置被调用 lang_code: {lang_code}')
 
         success = await user.update_user_language(telegram_id, lang_code)
         if not success:
-            await query.edit_message_text(text="语言切换失败，请稍后重试。")
+            await query.edit_message_text(text="❌ 语言切换失败，请稍后重试。")
             return
 
     _ = get_translator(lang_code)
-
+    # 删除原消息（含按钮），防止重复点击
+    try:
+        await context.bot.delete_message(
+            chat_id=telegram_id,
+            message_id=query.message.message_id
+        )
+    except Exception as e:
+        logger.debug(f"❗️删除语言选择消息失败: {e}")
+    # 更新命令
     commands = [
         BotCommand("start", f'▶️{_("开始")}'),
         BotCommand("help", f'💁{_("帮助信息")}'),
         BotCommand("language", f'🌏️{_("语言设置")}'),
-        BotCommand("news", f'📰{_("隔夜新闻")}'),
+        BotCommand("news", f'📰{_("隔夜新闻")}')
     ]
     scope = BotCommandScopeChat(chat_id=telegram_id)
     await context.bot.set_my_commands(commands=commands, scope=scope, language_code=lang_code)
 
-    await context.bot.send_message(
-        chat_id=telegram_id,
-        text=_("正在更新语言设置..."),
-        reply_markup=ReplyKeyboardRemove()
-    )
+    # 回复主按钮菜单
     reply_markup = get_main_button(lang_code)
+
+    # 一次性回复完整的设置结果
     await context.bot.send_message(
         chat_id=telegram_id,
-        text=_("语言已更改为：{lang}").format(lang=_("中文") if lang_code == 'zh' else _("English")),
-        reply_markup=reply_markup,
+        text="\n".join([
+            "✅ " + _("语言设置已更新成功！"),
+            _("当前语言：{lang}").format(lang=_("中文") if lang_code == 'zh' else _("English")),
+        ]),
+        reply_markup=reply_markup
     )
 
-    logger.info(f"已为用户 {telegram_id} 应用语言：{lang_code}")
+    logger.debug(f"已为用户 {telegram_id} 应用语言：{lang_code}")
