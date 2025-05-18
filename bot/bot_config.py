@@ -24,6 +24,7 @@ class Config:
         self.SYSTEM_PROMPT = os.getenv("SYSTEM_PROMPT", "").strip()
         self.ENV = os.getenv("ENV", "production").strip().lower()
         self.LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").strip().upper()
+        self.GROUP_JSON = os.getenv('GROUP_JSON', [])
 
     def is_dev(self):
         return self.ENV == "development"

@@ -3,6 +3,8 @@
 # @Author: Martin
 # @Desc :
 # @Date  :  2025/05/10
+import json
+
 from telegram.constants import ChatType
 
 from ..services import *
@@ -144,6 +146,14 @@ async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
     user_input = message.text
 
+    try:
+        group_json = config.GROUP_JSON
+        allowed_ids = json.loads(group_json)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"ALLOWED_IDS 不是合法 JSON：{e}")
+    if chat.id not in allowed_ids:
+        logger.debug(chat.id)
+        return
     # 判断是否是私聊
     if chat.type == ChatType.PRIVATE:
         should_reply = True

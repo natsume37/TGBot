@@ -130,4 +130,8 @@ def setup_logging():
     """项目启动时调用一次，建立日志系统。"""
     ensure_log_dirs_exist()
     logging.config.dictConfig(LOGGING_CONFIG)
+
+    # 终极静默模式、解决一切烦恼
+    for name in ('sqlalchemy', 'sqlalchemy.engine', 'httpcore', 'httpx', 'telegram'):
+        logging.getLogger(name).setLevel(logging.WARNING)
     logging.getLogger('root').info("日志系统已初始化")
