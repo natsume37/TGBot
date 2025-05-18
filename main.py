@@ -1,5 +1,4 @@
 import asyncio
-
 from bot.bot import main
 from compile_translations import compile_mo_files
 

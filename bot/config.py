@@ -12,6 +12,7 @@ LOG_DIR = os.path.join(BASE_DIR, "log")
 INFO_LOG_PATH = os.path.join(LOG_DIR, "info.log")
 ERROR_LOG_PATH = os.path.join(LOG_DIR, "error.log")
 DEBUG_LOG_PATH = os.path.join(LOG_DIR, "debug.log")
+USER_LOG_PATH = os.path.join(LOG_DIR, "user.log")
 
 
 def ensure_log_dirs_exist():
@@ -49,6 +50,15 @@ LOGGING_CONFIG = {
             'backupCount': 5,
             'encoding': 'utf-8',
         },
+        'user_info_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'DEBUG',
+            'formatter': 'detailed',
+            'filename': USER_LOG_PATH,
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 5,
+            'encoding': 'utf-8',
+        },
         'error_file': {
             'class': 'logging.handlers.RotatingFileHandler',
             'level': 'WARNING',
@@ -69,8 +79,8 @@ LOGGING_CONFIG = {
 
     'loggers': {
         # 你自己项目的日志器
-        'myproject': {
-            'handlers': ['console', 'info_file', 'error_file', 'debug_file'],
+        'userInfo': {
+            'handlers': ["user_info_file"],
             'level': 'DEBUG',
             'propagate': False,
         },
@@ -92,10 +102,15 @@ LOGGING_CONFIG = {
         },
         'httpx': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'propagate': False,
         },
         'telegram': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'openai._base_client': {
             'handlers': ['console'],
             'level': 'WARNING',
             'propagate': False,
@@ -115,8 +130,4 @@ def setup_logging():
     """项目启动时调用一次，建立日志系统。"""
     ensure_log_dirs_exist()
     logging.config.dictConfig(LOGGING_CONFIG)
-
-    # 为保险起见，手动再把已有 logger 的级别调高
-    for name in ('sqlalchemy', 'sqlalchemy.engine', 'httpcore', 'httpx', 'telegram'):
-        logging.getLogger(name).setLevel(logging.WARNING)
-    logging.getLogger('myproject').info("日志系统已初始化")
+    logging.getLogger('root').info("日志系统已初始化")

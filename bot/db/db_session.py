@@ -10,7 +10,7 @@ from bot.bot_config import Config
 
 config = Config()
 # 创建异步引擎
-async_engine = create_async_engine("mysql+aiomysql://" + config.DB_URL, echo=True)
+async_engine = create_async_engine("mysql+aiomysql://" + config.DB_URL)
 
 # 同步引擎，用于建表【废弃】
 # not_sync_engine = create_engine("mysql+pymysql://" + config.DB_URL, echo=True)
