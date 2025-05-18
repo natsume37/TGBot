@@ -23,6 +23,7 @@ def get_message_handles():
         MessageHandler(filters.TEXT & filters.Regex('我的'), about_user),
         MessageHandler(filters.TEXT & filters.Regex("📰新闻"), news_command),
         MessageHandler(filters.TEXT & filters.Regex(f"首页"), home_command),
+        MessageHandler(filters.TEXT & filters.Regex(f"[#签到|#sign]"), sign_in_message),
         # AI 回复功能
         MessageHandler(filters.TEXT & ~filters.COMMAND, ai_chat),
 

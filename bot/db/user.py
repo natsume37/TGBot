@@ -1,5 +1,5 @@
-from typing import Optional, Union
-from sqlalchemy import select
+from typing import Optional, Union, List
+from sqlalchemy import select, desc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,7 +10,9 @@ from bot.config import setup_logging
 # 加载日志配置
 setup_logging()
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 async def get_user(db: AsyncSession, telegram_id: int) -> Optional[User]:
     """异步获取用户对象"""
@@ -99,3 +101,24 @@ async def update_user_language(
             await db.rollback()
             logger.error(f"[update_user_language] Error: {e}")
             return False
+
+
+async def get_active_users(limit: int = 10) -> List[User]:
+    """
+    获取最近签到的活跃用户，按签到时间倒序排列，默认返回前10个。
+    """
+    async with AsyncSessionLocal() as db:
+        try:
+            stmt = (
+                select(User)
+                .where(User.last_sign_date.isnot(None))
+                .order_by(desc(User.last_sign_date))
+                .limit(limit)
+            )
+            result = await db.execute(stmt)
+            users = result.scalars().all()
+            logger.info(f"[get_active_users] 已获取最近活跃用户 Top{limit}")
+            return users
+        except SQLAlchemyError as e:
+            logger.error(f"[get_active_users] 查询失败: {e}")
+            return []

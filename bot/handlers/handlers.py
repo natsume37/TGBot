@@ -13,6 +13,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import Update, BotCommand, BotCommandScopeChat, ReplyKeyboardRemove
 from telegram.ext import ContextTypes
 
+from bot.db.sign_in import *
+
 # 加载日志配置
 setup_logging()
 import logging
@@ -22,6 +24,12 @@ logger = logging.getLogger(__name__)
 
 # Command
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    start命令
+    :param update:
+    :param context:
+    :return:
+    """
     telegram_id = update.effective_user.id
     telegram_name = update.effective_user.username or update.effective_user.first_name
 
@@ -43,6 +51,12 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    帮助菜单
+    :param update:
+    :param context:
+    :return:
+    """
     await update.message.reply_text("this is a test message about help")
 
 
@@ -60,6 +74,12 @@ async def news_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    语言功能
+    :param update:
+    :param context:
+    :return:
+    """
     keyboard = [
         [
             InlineKeyboardButton("中文", callback_data='zh'),
@@ -153,3 +173,17 @@ async def chat_for_ai(update: Update, context: ContextTypes.DEFAULT_TYPE, user_i
     except Exception as e:
         logger.error(f"GPT 请求失败：{e}")
         return "处理出错"
+
+
+# message-command
+async def sign_in_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    签到功能
+    :param update:
+    :param context:
+    :return:
+    """
+    async with AsyncSessionLocal() as db:
+        code, msg = await add_sign_in(db, update.effective_user.id)
+
+        await update.message.reply_text(text=msg)
