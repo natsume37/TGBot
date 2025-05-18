@@ -13,6 +13,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # 这里以 config.py 所
 INFO_LOG_DIR = os.path.join(BASE_DIR, "log", 'info.log')
 ERROR_LOG_DIR = os.path.join(BASE_DIR, "log", 'error.log')
 DEBUG_LOG_DIR = os.path.join(BASE_DIR, "log", 'debug.log')
+USER_LOG_DIR = os.path.join(BASE_DIR, "log", 'user.log')
 
 
 def ensure_log_dirs_exist():
@@ -73,6 +74,15 @@ LOGGING_DIC = {
             'encoding': 'utf-8',
             'formatter': 'standard',
         },
+        'user_info_handler': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': USER_LOG_DIR,
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 10,
+            'encoding': 'utf-8',
+            'formatter': 'standard',
+        },
         'sqlalchemy_handler': {
             'level': 'INFO' if IS_DEV else 'WARNING',
             'class': 'logging.StreamHandler',
@@ -90,6 +100,11 @@ LOGGING_DIC = {
             'level': 'INFO' if IS_DEV else 'WARNING',
             'propagate': False,
         },
+        'userInfo': {
+            'handlers': ["user_info_handler"],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
 
@@ -101,4 +116,3 @@ def setup_logging():
     sqlalchemy_level = logging.INFO if IS_DEV else logging.WARNING
     logging.getLogger("sqlalchemy.engine").setLevel(sqlalchemy_level)
     logger = logging.getLogger(__name__)
-
