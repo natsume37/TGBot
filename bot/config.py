@@ -19,12 +19,12 @@ def ensure_log_dirs_exist():
     os.makedirs(LOG_DIR, exist_ok=True)
 
 
-LOGGING_CONFIG = {
-    'version': 1,
-    'disable_existing_loggers': False,  # 保留未在此处显式配置的 logger，但我们后面会手动调整它们的级别
-
+LOGGING_DIC = {
+    'version': 1.0,
+    'disable_existing_loggers': False,
+    # 日志格式
     'formatters': {
-        'detailed': {
+        'standard': {
             'format': '%(asctime)s %(threadName)s:%(thread)d [%(name)s] %(levelname)s [%(pathname)s:%(lineno)d] %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S',
         },
@@ -32,106 +32,69 @@ LOGGING_CONFIG = {
             'format': '%(asctime)s [%(name)s] %(levelname)s %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S',
         },
+        'test': {
+            'format': '%(asctime)s %(message)s',
+        },
     },
-
+    'filters': {},
+    # 日志处理器
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'level': 'DEBUG',
-            'formatter': 'simple',
-            'stream': 'ext://sys.stdout',
+        'console_debug_handler': {
+            'level': 'DEBUG',  # 日志处理的级别限制
+            'class': 'logging.StreamHandler',  # 输出到终端
+            'formatter': 'simple'  # 日志格式
         },
-        'info_file': {
-            'class': 'logging.handlers.RotatingFileHandler',
+        'file_info_handler': {
             'level': 'INFO',
-            'formatter': 'detailed',
-            'filename': INFO_LOG_PATH,
-            'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 5,
+            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件,日志轮转
+            'filename': f'{USER_LOG_PATH}',
+            'maxBytes': 1024 * 1024 * 10,  # 日志大小 10M
+            'backupCount': 10,  # 日志文件保存数量限制
             'encoding': 'utf-8',
+            'formatter': 'standard',
         },
-        'user_info_file': {
-            'class': 'logging.handlers.RotatingFileHandler',
+        'file_debug_handler': {
             'level': 'DEBUG',
-            'formatter': 'detailed',
-            'filename': USER_LOG_PATH,
-            'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 5,
-            'encoding': 'utf-8',
+            'class': 'logging.FileHandler',  # 保存到文件
+            'filename': f'{DEBUG_LOG_PATH}',  # 日志存放的路径
+            'encoding': 'utf-8',  # 日志文件的编码
+            'formatter': 'test',
         },
-        'error_file': {
-            'class': 'logging.handlers.RotatingFileHandler',
+        'file_error_handler': {
             'level': 'WARNING',
-            'formatter': 'detailed',
-            'filename': ERROR_LOG_PATH,
-            'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 5,
+            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件,日志轮转
+            'filename': f'{ERROR_LOG_PATH}',
+            'maxBytes': 1024 * 1024 * 10,  # 日志大小 10M
+            'backupCount': 10,  # 日志文件保存数量限制
             'encoding': 'utf-8',
-        },
-        'debug_file': {
-            'class': 'logging.FileHandler',
-            'level': 'DEBUG',
-            'formatter': 'detailed',
-            'filename': DEBUG_LOG_PATH,
-            'encoding': 'utf-8',
+            'formatter': 'standard',
         },
     },
-
+    # 日志记录器
     'loggers': {
-        # 你自己项目的日志器
-        'userInfo': {
-            'handlers': ["user_info_file"],
-            'level': 'DEBUG',
-            'propagate': False,
+        'admin': {  # 导入时logging.getLogger时使用的app_name
+            'handlers': ['console_debug_handler'],  # 日志分配到哪个handlers中
+            'level': 'DEBUG',  # 日志记录的级别限制
+            'propagate': False,  # 默认为True，向上（更高级别的logger）传递，设置为False即可，否则会一份日志向上层层传递
         },
-        # 第三方库：强制提升到 WARNING
-        'sqlalchemy': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'sqlalchemy.engine': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'httpcore': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'httpx': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'telegram': {
-            'handlers': ['console'],
+        'logger2': {
+            'handlers': ['console_debug_handler', 'file_info_handler'],
             'level': 'INFO',
             'propagate': False,
         },
-        'openai._base_client': {
-            'handlers': ['console'],
-            'level': 'WARNING',
+        # 万能日志记录器
+        '': {
+            'handlers': ['console_debug_handler', 'file_info_handler', 'file_error_handler'],  # 及答应到终端、也保存到文件
+            'level': 'INFO',
             'propagate': False,
         },
-    },
-
-    # 根日志器：所有未单独配置的 logger 都走这里
-    'root': {
-        'handlers': ['console', 'info_file', 'error_file'],
-        'level': GLOBAL_LOG_LEVEL,
-        'propagate': False,
-    },
+    }
 }
 
 
 def setup_logging():
     """项目启动时调用一次，建立日志系统。"""
     ensure_log_dirs_exist()
-    logging.config.dictConfig(LOGGING_CONFIG)
+    logging.config.dictConfig(LOGGING_DIC)
 
-    # 终极静默模式、解决一切烦恼
-    for name in ('sqlalchemy', 'sqlalchemy.engine', 'httpcore', 'httpx', 'telegram'):
-        logging.getLogger(name).setLevel(logging.WARNING)
-    logging.getLogger('root').info("日志系统已初始化")
+    logging.getLogger('config').info("日志系统已初始化")

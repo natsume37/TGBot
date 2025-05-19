@@ -128,7 +128,7 @@ async def home_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup
         )
     elif update.callback_query:
-        logger.debug("callback类型按钮")
+        # logger.debug("callback类型按钮")
         await update.callback_query.edit_message_text(
             text=_("查看帮助👉️ /help；"),
             reply_markup=reply_markup
@@ -152,7 +152,7 @@ async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except json.JSONDecodeError as e:
         raise RuntimeError(f"ALLOWED_IDS 不是合法 JSON：{e}")
     if chat.id not in allowed_ids:
-        logger.debug(chat.id)
+        # logger.debug(chat.id)
         return
     # 判断是否是私聊
     if chat.type == ChatType.PRIVATE:
