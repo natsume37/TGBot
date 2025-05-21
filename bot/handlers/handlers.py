@@ -20,7 +20,7 @@ from bot.db.sign_in import *
 import logging
 
 logger = logging.getLogger(__name__)
-userInfo = logging.getLogger("userInfo")
+userInfo = logging.getLogger("user_info")
 
 
 # Command
@@ -145,19 +145,20 @@ async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     message = update.message
     user_input = message.text
-
+    logger.info("AI回答中")
     try:
         group_json = config.GROUP_JSON
         allowed_ids = json.loads(group_json)
     except json.JSONDecodeError as e:
         raise RuntimeError(f"ALLOWED_IDS 不是合法 JSON：{e}")
-    if chat.id not in allowed_ids:
-        # logger.debug(chat.id)
-        return
+
     # 判断是否是私聊
     if chat.type == ChatType.PRIVATE:
         should_reply = True
     else:
+        if chat.id not in allowed_ids:
+            # logger.debug(chat.id)
+            return
         # 群组中：仅当使用 @机器人用户名 艾特时回复
         bot_username = (await context.bot.get_me()).username
         should_reply = f"@{bot_username}" in user_input
