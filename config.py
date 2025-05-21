@@ -77,14 +77,20 @@ LOGGING_DIC = {
             'level': 'DEBUG',  # 日志记录的级别限制
             'propagate': False,  # 默认为True，向上（更高级别的logger）传递，设置为False即可，否则会一份日志向上层层传递
         },
-        'logger2': {
-            'handlers': ['console_debug_handler', 'file_info_handler'],
-            'level': 'INFO',
+        'user_info': {
+            'handlers': ['console_debug_handler', 'file_info_handler', 'file_error_handler'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'httpx': {
+            'handlers': ['console_debug_handler'],
+            # 'level': 'INFO',
+            'level': 'WARNING',
             'propagate': False,
         },
         # 万能日志记录器
         '': {
-            'handlers': ['console_debug_handler', 'file_info_handler', 'file_error_handler'],  # 及答应到终端、也保存到文件
+            'handlers': ['console_debug_handler'],  # 及答应到终端、也保存到文件
             'level': 'INFO',
             'propagate': False,
         },

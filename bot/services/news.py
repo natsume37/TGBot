@@ -45,7 +45,16 @@ class NewsFetcher:
 
         weekday_now = datetime.now().weekday()
         if weekday_news != weekday_now:
-            return "周日周一暂无隔夜新闻！"
+            # 调用AI来总结回答
+            try:
+                from bot.services.server_ai import ChatGPTBot
+                ai_news = ChatGPTBot(
+                    prompt="请你给出最近发生的10条国内外热点新闻、总结提炼、回复简精炼！输出格式为：开头显示当前日期、第二行显示隔夜新闻四个字、最后再显示你总结的新闻！")
+                res = await ai_news.chat(1010,
+                                         "请给出今日新闻")
+                return res
+            except Exception as e:
+                return "周日、周一暂无隔夜新闻"
 
         fmt_time = time.strftime("%Y年%m月%d日", ts)
         news_text = re.sub(r"(\d{1,2}、)", r"\n\1", news_text)

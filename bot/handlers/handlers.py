@@ -10,13 +10,13 @@ from telegram.constants import ChatType
 from ..services import *
 from bot.handlers.menu import *
 
-from bot.db.db_session import AsyncSessionLocal
-from bot.db import user
+from db.db_session import AsyncSessionLocal
+from db import user
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import Update, BotCommand, BotCommandScopeChat, ReplyKeyboardRemove
 from telegram.ext import ContextTypes
 
-from bot.db.sign_in import *
+from db.sign_in import *
 import logging
 
 logger = logging.getLogger(__name__)
@@ -145,7 +145,7 @@ async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     message = update.message
     user_input = message.text
-    logger.info("AI回答中")
+    logger.debug("AI回答中")
     try:
         group_json = config.GROUP_JSON
         allowed_ids = json.loads(group_json)
@@ -189,7 +189,7 @@ async def chat_for_ai(update: Update, context: ContextTypes.DEFAULT_TYPE, user_i
             if user_obj.ai_token >= 1:
                 bot = ChatGPTBot()
                 res = await bot.chat(telegram_id, user_input)
-                userInfo.info(f"{telegram_id}: {user_input}")
+                userInfo.info(f"{telegram_id} {update.effective_user.username}: {user_input}")
                 user_obj.ai_token -= 1
                 await db.commit()
 

@@ -60,7 +60,7 @@ async def update_user_block_status(
         user.is_block = is_block
         await db.commit()
         await db.refresh(user)
-        logger.debug(f"User {telegram_id} block status set to {is_block}")
+        # logger.debug(f"User {telegram_id} block status set to {is_block}")
         return True
     except SQLAlchemyError as e:
         await db.rollback()
@@ -91,7 +91,7 @@ async def update_user_language(
 
             user.language = lang_enum
             await db.commit()
-            logger.debug(f"Updated user.language = {user.language}")
+            # logger.debug(f"Updated user.language = {user.language}")
             return True
         except SQLAlchemyError as e:
             await db.rollback()

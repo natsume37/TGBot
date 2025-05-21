@@ -11,7 +11,7 @@ from sqlalchemy import (
     func,
     Date,
     UniqueConstraint,
-    Index,
+    Index, DECIMAL,
 )
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -81,3 +81,41 @@ class SignIn(Base):
         UniqueConstraint("user_id", "sign_date", name="uq_user_date"),
         Index("idx_user_date", "user_id", "sign_date"),
     )
+
+
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True, comment="分类主键")
+
+    name = Column(String(100), nullable=False, comment="分类名称")
+
+    parent_id = Column(Integer, nullable=True, comment="父级分类ID")
+
+    level = Column(Integer, nullable=False, comment="分类等级：1为大类，2为子类")
+
+    def __repr__(self):
+        return f"<Category(name={self.name}, level={self.level})>"
+
+
+class Expense(Base):
+    __tablename__ = "expenses"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
+
+    user_id = Column(BigInteger, nullable=False, index=True, comment="用户 telegram_id")
+
+    category_id = Column(Integer, nullable=False, index=True, comment="分类ID")
+
+    amount = Column(DECIMAL(10, 2), nullable=False, comment="消费金额")
+
+    description = Column(String(255), nullable=True, comment="消费描述")
+
+    date = Column(Date, nullable=False, default=date.today, comment="消费日期")
+
+    payment_method = Column(String(50), nullable=True, comment="支付方式，如微信/支付宝/现金")
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, comment="记录创建时间")
+
+    def __repr__(self):
+        return f"<Expense(user_id={self.user_id}, amount={self.amount}, category_id={self.category_id})>"

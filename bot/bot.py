@@ -9,12 +9,12 @@ import signal
 
 import nest_asyncio
 from bot.bot_config import Config
-from bot.config import setup_logging
+from config import setup_logging
 from bot.handlers import *
 from bot.utils.error import error
 from bot.handlers.menu import *
-from bot.db.db_session import async_engine
-from bot.db import models
+from db.db_session import async_engine
+from db import models
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 # 补丁
@@ -63,7 +63,7 @@ async def main():
     app = locate_update()
 
     # 初始化表
-    # await async_create_tables(async_engine)
+    await async_create_tables(async_engine)
 
     # Error
     app.add_error_handler(error)

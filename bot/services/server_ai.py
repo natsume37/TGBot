@@ -16,11 +16,12 @@ config = Config()
 
 
 class ChatGPTBot:
-    def __init__(self, api_key: str = config.OPEN_KEY, model: str = config.MODEL_TYPE):
+    def __init__(self, api_key: str = config.OPEN_KEY, model: str = config.MODEL_TYPE,
+                 prompt: str = config.SYSTEM_PROMPT):
         self.client = openai.AsyncOpenAI(api_key=api_key, base_url=config.OPEN_BASIC_URL)
         self.model = model
         self.sessions = defaultdict(list)  # user_id -> message list
-        self.default_system_prompt = config.SYSTEM_PROMPT
+        self.default_system_prompt = prompt
 
     def reset_session(self, user_id: int):
         self.sessions[user_id] = []

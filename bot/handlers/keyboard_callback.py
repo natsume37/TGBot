@@ -5,8 +5,8 @@
 # @Date  :  2025/05/14
 
 from bot.handlers.handlers import *
-from bot.db import user  # 假设 user 是你写的用户操作模块
-from bot.db.db_session import AsyncSessionLocal
+from db import user  # 假设 user 是你写的用户操作模块
+from db.db_session import AsyncSessionLocal
 from telegram import BotCommand, BotCommandScopeChat, ReplyKeyboardRemove
 from telegram.ext import ContextTypes
 from telegram import Update

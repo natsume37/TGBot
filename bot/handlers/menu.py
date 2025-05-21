@@ -11,8 +11,8 @@ from telegram.ext import Application
 
 from ..keyboard.main_menu import *
 
-from bot.db import user
-from bot.db.db_session import AsyncSessionLocal
+from db import user
+from db.db_session import AsyncSessionLocal
 from bot.utils.tools import get_translator
 import logging
 
@@ -67,3 +67,4 @@ async def about_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=get_profile_keyboard(),
             parse_mode="HTML"
         )
+

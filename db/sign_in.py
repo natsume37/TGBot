@@ -31,7 +31,7 @@ async def add_sign_in(db: AsyncSession, user_id: int, sign_date: Optional[date] 
 
     # 先检查是否已经签到
     if await user_signed_in_on(db, user_id, sign_date):
-        logger.debug(f"User {user_id} already signed in on {sign_date}")
+        # logger.debug(f"User {user_id} already signed in on {sign_date}")
         return False, "你已经签过到了"
 
     try:
@@ -44,7 +44,7 @@ async def add_sign_in(db: AsyncSession, user_id: int, sign_date: Optional[date] 
         user_res = await db.execute(user_stmt)
         user = user_res.scalars().first()
         if not user:
-            logger.error(f"User {user_id} not found when adding sign-in")
+            # logger.error(f"User {user_id} not found when adding sign-in")
             await db.rollback()
             return False, "签到失败、请执行start命令重试"
 
@@ -64,7 +64,7 @@ async def add_sign_in(db: AsyncSession, user_id: int, sign_date: Optional[date] 
 
         await db.commit()
         await db.refresh(user)
-        logger.debug(f"User {user_id} signed in on {sign_date}. Streak: {user.streak_days}, Total: {user.total_days}")
+        # logger.debug(f"User {user_id} signed in on {sign_date}. Streak: {user.streak_days}, Total: {user.total_days}")
         return True, "签到成功"
     except SQLAlchemyError as e:
         await db.rollback()

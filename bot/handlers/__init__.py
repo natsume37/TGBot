@@ -7,6 +7,7 @@ from telegram.ext import CommandHandler, MessageHandler, filters, CallbackQueryH
 from .handlers import *
 from .menu import *
 from .keyboard_callback import *
+from .admin import *
 
 
 def get_commands():
@@ -25,6 +26,7 @@ def get_message_handles():
         MessageHandler(filters.TEXT & filters.Regex(r"🔥首页"), home_command),
         MessageHandler(filters.TEXT & filters.Regex(r"^#(签到|sign)"), sign_in_message),
         MessageHandler(filters.TEXT & filters.Regex(r"^#(id|ID)"), get_id_message),
+        MessageHandler(filters.TEXT & filters.Regex(r"/ban"), han_root_command),
         # AI 回复功能
         MessageHandler(filters.TEXT & ~filters.COMMAND, ai_chat),
 
