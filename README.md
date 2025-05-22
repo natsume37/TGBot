@@ -43,7 +43,7 @@ compile_mo_files()
 
 ```
 
-# 效果图
+# 效果图如下
 
 <img src="static/start.png" alt="开始菜单" style="zoom: 80%;" />
 
