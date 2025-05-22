@@ -2,7 +2,7 @@
 
 # 简介
 
-这是一个个人娱乐的TelegramBot机器人项目、aiomysql作为后端存储用户基本信息
+这是一个个人娱乐的TelegramBot机器人项目、管理员页面支持。
 
 包括一下几个功能
 
@@ -12,6 +12,7 @@
 - 每日新闻
 - 签到功能
 - 多语言支持
+- 后端bot管理
 
 # 使用说明
 
@@ -47,3 +48,5 @@ compile_mo_files()
 <img src="static/start.png" alt="开始菜单" style="zoom: 80%;" />
 
 <img src="static/菜单.png" alt="开始菜单" style="zoom: 80%;" />
+    
+<img src="static/管理员页面.png" alt="管理员页面" style="zoom: 80%;" >
