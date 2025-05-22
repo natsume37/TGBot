@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>用户消费记录</title>
+    <!-- Bootstrap CSS 国内镜像 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+
+<div class="container-fluid p-4">
+
+    <h2 class="mb-4">用户：{{ username or "未知用户" }} 的消费记录</h2>
+
+    <!-- 消费统计卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">总消费次数</h5>
+                    <p class="card-text display-5">{{ total_transactions or 0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">总消费金额</h5>
+                    <p class="card-text display-5">¥{{ total_amount or "0.00" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">平均每次消费</h5>
+                    <p class="card-text display-5">¥{{ average_amount or "0.00" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 消费明细表 -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">详细消费记录</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>日期</th>
+                    <th>项目</th>
+                    <th>金额 (¥)</th>
+                    <th>备注</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for record in records %}
+                    <tr>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.item }}</td>
+                        <td>{{ "%.2f"|format(record.amount) }}</td>
+                        <td>{{ record.note or "" }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">暂无消费记录</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 返回首页按钮 -->
+    <div class="mt-4">
+        <a href="/" class="btn btn-secondary">返回首页</a>
+    </div>
+
+</div>
+
+<!-- Bootstrap JS 国内镜像 -->
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

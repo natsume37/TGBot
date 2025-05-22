@@ -1,7 +1,10 @@
-from typing import Optional, Union, List
-from sqlalchemy import select, desc
+from functools import wraps
+from typing import Optional, Union, List, Tuple
+from sqlalchemy import select, desc, func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from telegram import Update
+from telegram.ext import ContextTypes
 
 from .models import User, LanguageEnum
 from .db_session import AsyncSessionLocal
@@ -118,3 +121,66 @@ async def get_active_users(limit: int = 10) -> List[User]:
         except SQLAlchemyError as e:
             logger.error(f"[get_active_users] 查询失败: {e}")
             return []
+
+
+async def get_user_api(telegram_id: int) -> Optional[User]:
+    db: Optional[AsyncSession] = None
+    try:
+        db = AsyncSessionLocal()
+        async with db:
+            result = await db.execute(select(User).where(User.telegram_id == telegram_id))
+            return result.scalars().first()
+    except SQLAlchemyError as e:
+        logger.error(f"[get_user_api] 查询失败: {e}")
+        return None
+
+
+async def get_users_by_page(
+        session: AsyncSession, page: int = 1, per_page: int = 10
+) -> Tuple[List[User], int]:
+    total_users = await session.scalar(select(func.count()).select_from(User))
+
+    offset = (page - 1) * per_page
+    result = await session.execute(
+        select(User)
+        .order_by(desc(User.created_at))
+        .offset(offset)
+        .limit(per_page)
+    )
+    users = result.scalars().all()
+
+    return users, total_users
+
+
+def admin_only(func):
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        telegram_id = update.effective_user.id if update.effective_user else None
+        if telegram_id is None:
+            await update.message.reply_text("⛔ 无法识别用户身份")
+            return
+        # logger.debug("是管理员")
+        async with AsyncSessionLocal() as db:  # 获取数据库会话
+            userdb = await get_user(db, telegram_id)
+            if not userdb.is_admin:
+                return
+        return await func(update, context, *args, **kwargs)
+
+    return wrapper
+
+
+def is_block(func):
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        telegram_id = update.effective_user.id if update.effective_user else None
+        if telegram_id is None:
+            await update.message.reply_text("⛔ 无法识别用户身份")
+            return
+        # logger.debug("是管理员")
+        async with AsyncSessionLocal() as db:  # 获取数据库会话
+            userdb = await get_user(db, telegram_id)
+            if userdb.is_block:
+                return
+        return await func(update, context, *args, **kwargs)
+
+    return wrapper

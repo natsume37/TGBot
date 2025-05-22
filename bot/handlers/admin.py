@@ -7,6 +7,8 @@ from functools import wraps
 
 from telegram import Update
 from telegram.ext import ContextTypes
+
+from db.user import *
 from db.db_session import AsyncSessionLocal
 from db import user
 from bot.keyboard.admin_keyboard import *
@@ -15,23 +17,6 @@ import logging
 from bot.utils.tools import get_translator
 
 logger = logging.getLogger(__name__)
-
-
-def admin_only(func):
-    @wraps(func)
-    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
-        telegram_id = update.effective_user.id if update.effective_user else None
-        if telegram_id is None:
-            await update.message.reply_text("⛔ 无法识别用户身份")
-            return
-        # logger.debug("是管理员")
-        async with AsyncSessionLocal() as db:  # 获取数据库会话
-            userdb = await user.get_user(db, telegram_id)
-            if not userdb.is_admin:
-                return
-        return await func(update, context, *args, **kwargs)
-
-    return wrapper
 
 
 @admin_only

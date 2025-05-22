@@ -23,7 +23,7 @@ class NewsFetcher:
             "keyword": "你需要知道的隔夜全球要闻",
             "page": 0,
             "rn": 1,
-            "os": "web",
+            "os": "webapp",
             "sv": "7.7.5",
             "app": "CailianpressWeb"
         }

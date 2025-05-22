@@ -23,6 +23,9 @@ class LanguageEnum(str, Enum):
     ZH = "zh"
 
 
+from sqlalchemy import String
+
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -63,6 +66,8 @@ class User(Base):
     streak_days = Column(Integer, default=0, nullable=False, comment='连续签到天数')
 
     total_days = Column(Integer, default=0, nullable=False, comment='累计签到天数')
+
+    password = Column(String(128), nullable=True, comment='登录密码（哈希值），默认允许为 null')
 
 
 class SignIn(Base):

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>后台管理系统</title>
+    <!-- Bootstrap CSS 国内镜像 -->
+    <link
+      href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons 国内镜像 -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
+    />
+    <style>
+      body {
+        min-height: 100vh;
+        display: flex;
+        overflow: hidden;
+      }
+      #sidebar {
+        min-width: 220px;
+        max-width: 220px;
+        background-color: #343a40;
+        color: white;
+        height: 100vh;
+        position: fixed;
+      }
+      #sidebar .nav-link {
+        color: #adb5bd;
+      }
+      #sidebar .nav-link.active {
+        background-color: #495057;
+        color: white;
+      }
+      #content {
+        margin-left: 220px;
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 20px;
+      }
+      .navbar-brand {
+        font-weight: 600;
+      }
+    </style>
+</head>
+<body>
+    <nav id="sidebar" class="d-flex flex-column p-3">
+        <a href="/" class="navbar-brand mb-4 text-white text-center">管理系统</a>
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item mb-2">
+                <a href="/" class="nav-link active" aria-current="page">
+                    <i class="bi bi-house-door-fill me-2"></i> 首页
+                </a>
+            </li>
+            <li>
+                <a href="/records" class="nav-link">
+                    <i class="bi bi-bar-chart-line-fill me-2"></i> 消费统计
+                </a>
+            </li>
+            <li>
+                <a href="/users" class="nav-link">
+                    <i class="bi bi-people-fill me-2"></i> 用户管理
+                </a>
+            </li>
+            <li>
+                <a href="/settings" class="nav-link">
+                    <i class="bi bi-gear-fill me-2"></i> 设置
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div id="content">
+      <nav class="navbar navbar-expand navbar-light bg-light mb-4">
+        <div class="container-fluid">
+          <span class="navbar-text">
+            欢迎管理员，<strong>{{ username or "Admin" }}</strong>！
+          </span>
+          <div>
+            <a href="/logout" class="btn btn-outline-danger btn-sm">退出登录</a>
+          </div>
+        </div>
+      </nav>
+
+      <main>
+        <h1>欢迎来到后台管理系统</h1>
+        <p class="lead">这里可以查看消费统计、用户管理和系统设置。</p>
+        <hr />
+        <section>
+          <h4>快速入口</h4>
+          <div class="list-group w-50">
+            <a href="/records" class="list-group-item list-group-item-action">
+              查看消费统计
+            </a>
+            <a href="/users" class="list-group-item list-group-item-action">
+              用户管理
+            </a>
+            <a href="/settings" class="list-group-item list-group-item-action">
+              系统设置
+            </a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Bootstrap JS 国内镜像 -->
+    <script
+      src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"
+    ></script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>用户管理 - 管理系统</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"/>
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        #sidebar {
+            min-width: 220px;
+            background-color: #343a40;
+            color: white;
+            height: 100vh;
+            position: fixed;
+        }
+
+        #sidebar .nav-link {
+            color: #adb5bd;
+        }
+
+        #sidebar .nav-link.active {
+            background-color: #495057;
+            color: white;
+        }
+
+        #content {
+            margin-left: 220px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 侧边栏 -->
+<nav id="sidebar" class="d-flex flex-column p-3">
+    <a href="/" class="navbar-brand mb-4 text-white text-center">管理系统</a>
+    <ul class="nav nav-pills flex-column">
+        <li class="nav-item mb-2">
+            <a href="/" class="nav-link">
+                <i class="bi bi-house-door-fill me-2"></i> 首页
+            </a>
+        </li>
+        <li>
+            <a href="/records" class="nav-link">
+                <i class="bi bi-bar-chart-line-fill me-2"></i> 消费统计
+            </a>
+        </li>
+        <li>
+            <a href="/users" class="nav-link active">
+                <i class="bi bi-people-fill me-2"></i> 用户管理
+            </a>
+        </li>
+        <li>
+            <a href="/settings" class="nav-link">
+                <i class="bi bi-gear-fill me-2"></i> 设置
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<!-- 内容区 -->
+<div id="content">
+    <nav class="navbar navbar-expand navbar-light bg-light mb-4">
+        <div class="container-fluid">
+            <span class="navbar-text">欢迎管理员，<strong>{{ username or "Admin" }}</strong>！</span>
+            <div>
+
+            </div>
+        </div>
+    </nav>
+    <h3>用户管理</h3>
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-secondary">
+        <tr>
+            <th>ID</th>
+            <th>Telegram ID</th>
+            <th>用户名</th>
+            <th>是否管理员</th>
+            <th>AI Token</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.telegram_id }}</td>
+                <td>{{ user.telegram_name or "-" }}</td>
+                <td>{{ "是" if user.is_admin else "否" }}</td>
+                <td>{{ user.ai_token }}</td>
+                <td>
+                    {% if user.is_block %}
+                        <span class="badge bg-danger">已锁定</span>
+                    {% else %}
+                        <span class="badge bg-success">正常</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editModal"
+                            data-id="{{ user.id }}"
+                            data-admin="{{ '1' if user.is_admin else '0' }}"
+                            data-token="{{ user.ai_token }}">
+                        <i class="bi bi-pencil-square"></i> 编辑
+                    </button>
+                    <a href="/users/toggle_block/{{ user.id }}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-lock-fill"></i> {{ '解锁' if user.is_block else '锁定' }}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <nav>
+    <ul class="pagination justify-content-center">
+        {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="/users?page={{ p }}">{{ p }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</nav>
+</div>
+
+<!-- 编辑用户 Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="/users/update" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">编辑用户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="user_id" id="edit-user-id">
+                <div class="mb-3">
+                    <label class="form-label">是否为管理员</label>
+                    <select class="form-select" name="is_admin" id="edit-is-admin">
+                        <option value="1">是</option>
+                        <option value="0">否</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">AI Token 数量</label>
+                    <input type="number" class="form-control" name="ai_token" id="edit-ai-token" min="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script>
+    const editModal = document.getElementById('editModal');
+    editModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const userId = button.getAttribute('data-id');
+        const isAdmin = button.getAttribute('data-admin');
+        const aiToken = button.getAttribute('data-token');
+
+        document.getElementById('edit-user-id').value = userId;
+        document.getElementById('edit-is-admin').value = isAdmin;
+        document.getElementById('edit-ai-token').value = aiToken;
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        // 从URL参数读取消息
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+
+        if (msg) {
+            // 创建一个toast提示div
+            const container = document.getElementById('toast-container');
+            const toastElem = document.createElement('div');
+
+            toastElem.className = 'alert alert-success alert-dismissible fade show';
+            toastElem.setAttribute('role', 'alert');
+            toastElem.style.marginBottom = '0.5rem';
+            toastElem.innerHTML = `
+            ${msg}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+            container.appendChild(toastElem);
+
+            // 自动关闭3秒后
+            setTimeout(() => {
+                const alert = bootstrap.Alert.getOrCreateInstance(toastElem);
+                alert.close();
+            }, 3000);
+        }
+    });
+</script>
+<!-- 悬浮提示容器 -->
+<div id="toast-container" style="
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1080;  /* Bootstrap 默认toast的层级 */
+    min-width: 250px;
+"></div>
+</body>
+</html>

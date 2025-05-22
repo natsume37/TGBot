@@ -11,7 +11,7 @@ from ..services import *
 from bot.handlers.menu import *
 
 from db.db_session import AsyncSessionLocal
-from db import user
+from db import user, is_block
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import Update, BotCommand, BotCommandScopeChat, ReplyKeyboardRemove
 from telegram.ext import ContextTypes
@@ -135,6 +135,7 @@ async def home_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
+@is_block
 async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     AI 回复、私聊直接回复、其他的判断是否被艾特
