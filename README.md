@@ -49,4 +49,4 @@ compile_mo_files()
 
 <img src="static/菜单.png" alt="开始菜单" style="zoom: 80%;" />
     
-<img src="static/管理员页面.png" alt="管理员页面" style="zoom: 80%;" >
+<img src="static/管理员页面.png" alt="管理员页面" style="zoom: 80%;" >    
