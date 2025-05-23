@@ -74,6 +74,8 @@ async def main():
     await set_bot_commands(app)
 
     app.run_polling(poll_interval=3, close_loop=False)
+    # 优雅的断开数据库连接
+    await async_engine.dispose()
 
 
 if __name__ == '__main__':

@@ -16,10 +16,11 @@ async_engine = create_async_engine("mysql+aiomysql://" + config.DB_URL)
 # not_sync_engine = create_engine("mysql+pymysql://" + config.DB_URL, echo=True)
 # 创建异步Session工厂，后续操作都使用 AsyncSession
 AsyncSessionLocal = sessionmaker(
-    class_=AsyncSession,
-    bind=async_engine,
-    expire_on_commit=False,
+    autocommit=False,
     autoflush=False,
+    bind=async_engine,
+    class_=AsyncSession,
+    expire_on_commit=False  # 提交后不刷新实例，避免再次访问时去数据库加载
 )
 
 # 声明基类，所有模型继承它
